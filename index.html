@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QR-Ordnercodes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{--bg:#e6e9ec;--surf:#f7f8f9;--ink:#1b1f24;--mute:#5b6570;--line:#c3c9cf;--acc:#f2b705;--acc-ink:#1b1f24;--err:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181b;--surf:#1f2429;--ink:#eceff1;--mute:#9aa5af;--line:#38414a;--err:#ff8a80}}
+:root[data-theme="dark"]{--bg:#15181b;--surf:#1f2429;--ink:#eceff1;--mute:#9aa5af;--line:#38414a;--err:#ff8a80}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Bahnschrift","Segoe UI",system-ui,sans-serif}
+header{padding:14px 16px 0}
+h1{margin:0;font-size:1.35rem;font-weight:700;letter-spacing:.01em}
+.sub{color:var(--mute);font-size:.9rem;margin:2px 0 0}
+nav{display:flex;gap:0;margin:12px 16px 0;border-bottom:2px solid var(--line)}
+nav button{flex:1;background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:12px 4px;font:inherit;font-weight:600;color:var(--mute)}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+main{padding:14px 16px 32px;max-width:900px;margin:0 auto}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:6px;padding:12px 16px;font:inherit;font-weight:700;min-height:48px}
+.btn.alt{background:var(--surf);color:var(--ink);border:1px solid var(--line)}
+input[type=search]{flex:1;min-width:140px;min-height:48px;border:1px solid var(--line);border-radius:6px;background:var(--surf);color:var(--ink);padding:0 12px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.house{background:var(--surf);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:6px;text-align:left;padding:10px 10px;font:inherit;min-height:64px}
+.house b{display:block;font-size:1.15rem}
+.house span{color:var(--mute);font-size:.88rem}
+.empty{border:2px dashed var(--line);border-radius:8px;padding:28px 16px;text-align:center;color:var(--mute)}
+.note{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 12px;font-size:.92rem}
+.note.err{border-color:var(--err)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:#fff;color:#111;border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line);font:inherit;width:100%;cursor:pointer}
+.card svg{width:100%;height:auto;display:block}
+.card h3{margin:8px 0 0;font-size:1.05rem}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);padding:18px;max-width:min(440px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog p{margin:0 0 14px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+#qrov{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;padding:env(safe-area-inset-top,0px) 12px env(safe-area-inset-bottom,0px);z-index:5}
+#qrov.on{display:flex}
+[hidden]{display:none!important}
+#qrov .top{display:flex;align-items:center;padding:10px 0;gap:8px}
+#qrov .top .btn{padding:12px 12px}
+#qrov .top .sub{margin-left:auto;white-space:nowrap;font-size:.85rem}
+#ktabs{display:flex;gap:6px;margin:0 0 10px}
+#ktabs .btn{flex:1;padding:10px 4px}
+#ktabs .btn[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+#qhead{font-size:1.2rem;font-weight:700;text-align:center;margin:0 8px 8px;overflow-wrap:anywhere}
+.log{margin:0 0 12px}
+.log summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600;background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:0 12px;list-style:none}
+.log summary::-webkit-details-marker{display:none}
+.log summary::before{content:"\25BE";margin-right:8px}
+.log:not([open]) summary::before{content:"\25B8"}
+.logbody{margin-top:8px}
+.logbody .note:last-child{margin-bottom:0}
+#qrbox{background:#fff;border-radius:10px;padding:14px;margin:0 auto;width:min(100%,70vh);flex:0 1 auto}
+#qrbox svg{width:100%;height:auto;display:block}
+#qrname{font-size:1.3rem;font-weight:700;text-align:center;margin:14px 8px 4px;overflow-wrap:anywhere}
+.nav2{display:flex;gap:8px;margin:auto 0 12px}
+.nav2 .btn{flex:1}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>QR-Ordnercodes</h1>
+  <p class="sub" id="status">Noch keine Tabelle geladen.</p>
+</header>
+<nav role="tablist">
+  <button role="tab" id="t1" aria-selected="true">Gebäude</button>
+  <button role="tab" id="t2" aria-selected="false">Steuerkarten</button>
+</nav>
+<main>
+  <section id="v1">
+    <div class="bar">
+      <button class="btn" id="load">Excel-Tabelle laden</button>
+      <input type="search" id="q" placeholder="Suchen, z. B. 340a">
+      <input type="file" id="file" accept=".xlsx,.xls" hidden>
+    </div>
+    <div id="msg"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+  <section id="v2" hidden>
+    <p class="note">Diese vier Karten drucken und beim Fotografieren mitführen. Antippen zeigt den Code im Vollbild. Der Inhalt der Codes ist jeweils unter dem Bild angegeben.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+</main>
+
+<div id="qrov" role="dialog" aria-modal="true" aria-label="QR-Code">
+  <div class="top"><button class="btn alt" id="close">Schließen</button><button class="btn alt" id="kbtn" hidden>Steuerkarten</button><span class="sub" id="cnt"></span></div>
+  <div id="ktabs" hidden></div>
+  <div id="qhead" hidden></div>
+  <div id="qrbox"></div>
+  <div id="qrname"></div>
+  <div class="nav2"><button class="btn alt" id="prev">Zurück</button><button class="btn alt" id="next">Weiter</button></div>
+</div>
+
+<dialog id="dlg">
+  <p id="dtext"></p>
+  <div class="row"><button class="btn" id="dyes"></button><button class="btn alt" id="dno">Zeile überspringen</button></div>
+</dialog>
+
+<script>
+"use strict";
+// QR-Texte mit Umlauten als UTF-8 kodieren
+qrcode.stringToBytes = s => Array.from(new TextEncoder().encode(s));
+const $ = id => document.getElementById(id);
+let rows = [];          // {pos, name}
+let shown = [];         // aktuell gefilterte Liste
+let cur = 0;
+let ov = [];
+let haus = false, karten = false, kc = 0;   // Vollbild: Gebäude-Modus, Steuerkarten-Ansicht, gewählte Karte
+const KURZ = ["Außen", "Innen", "Start", "Stop"];            // Liste für die Vollbildansicht: {code, label}
+
+const PREFIX = "ORDNER:";
+const CONTROL = [
+  {t: "Außenaufnahmen", c: "CMD:AUSSEN"},
+  {t: "Innenaufnahmen", c: "CMD:INNEN"},
+  {t: "Start Gutachten", c: "CMD:START"},
+  {t: "Stop Gutachten", c: "CMD:STOP"}
+];
+
+function clean(v){
+  return String(v == null ? "" : v)
+    .replace(/[\\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[. ]+$/, "");
+}
+
+function qrSvg(text){
+  const qr = qrcode(0, "M");
+  qr.addData(text, "Byte");
+  qr.make();
+  const n = qr.getModuleCount(), m = 4;
+  let d = "";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+    if (qr.isDark(r, c)) d += "M" + (c + m) + " " + (r + m) + "h1v1h-1z";
+  const s = n + 2 * m;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + s + " " + s +
+    '" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+}
+
+// ---------- Excel einlesen ----------
+function parseSheet(buf){
+  const wb = XLSX.read(buf, {type: "array"});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const data = XLSX.utils.sheet_to_json(ws, {header: 1, raw: false, defval: ""});
+  const out = [];
+  // SheetJS lässt führende Leerzeilen weg: tatsächlichen Zeilenversatz und Kopfzeile selbst bestimmen
+  const off = XLSX.utils.decode_range(ws["!ref"]).s.r;
+  let head = data.findIndex(r => /^stra(ss|ß)e$/i.test(clean(r[1])));
+  if (head < 0) head = 2 - off;                      // Ersatz: Kopf in Excel-Zeile 2
+  for (let i = head + 1; i < data.length; i++){      // Daten direkt unter der Kopfzeile
+    const r = data[i];
+    if (/gesamte/i.test(r.join(" "))) break;        // Summenzeile = Tabellenende
+    const street = clean(r[1]);
+    if (!street) continue;
+    let pos = clean(r[0]);
+    if (/^\d+$/.test(pos) && pos.length < 2) pos = pos.padStart(2, "0");
+    out.push({line: off + i + 1, pos, street, nr: clean(r[2])});
+  }
+  return out;
+}
+
+function nameOf(x){ return [x.pos, x.street, x.nr].filter(Boolean).join("_"); }
+
+function ask(text, yes){
+  return new Promise(res => {
+    $("dtext").textContent = text;
+    $("dyes").textContent = yes;
+    const d = $("dlg");
+    const done = v => { d.close(); res(v); };
+    $("dyes").onclick = () => done(true);
+    $("dno").onclick = () => done(false);
+    d.oncancel = e => { e.preventDefault(); };
+    d.showModal();
+  });
+}
+
+async function importFile(file){
+  const msgs = [];
+  let list;
+  try { list = parseSheet(await file.arrayBuffer()); }
+  catch (e) { $("msg").innerHTML = '<p class="note err">Die Datei konnte nicht gelesen werden. Bitte eine .xlsx-Datei wählen.</p>'; return; }
+
+  // Zeilen ohne Nummer: Fehler melden, Benutzer fragt nach neuer Nummer
+  const nums = list.map(x => /^\d+$/.test(x.pos) ? parseInt(x.pos, 10) : 0);
+  let next = Math.max(0, ...nums) + 1;
+  const width = Math.max(2, String(next).length);
+  const keep = [];
+  for (const x of list){
+    if (!x.pos){
+      const label = [x.street, x.nr].filter(Boolean).join(" ");
+      const num = String(next).padStart(width, "0");
+      const ok = await ask("Fehler in Zeile " + x.line + ": „" + label + "“ hat keine Nummer. Soll die nächste freie Nummer (" + num + ") am Tabellenende vergeben werden?", "Nummer " + num + " vergeben");
+      if (!ok){ msgs.push("Zeile " + x.line + " („" + label + "“) übersprungen."); continue; }
+      x.pos = num; next++;
+      msgs.push("Zeile " + x.line + " („" + label + "“) erhielt die Nummer " + num + ".");
+    }
+    keep.push(x);
+  }
+
+  // doppelte Ordnernamen melden
+  const seen = {}, dup = [];
+  for (const x of keep){ x.name = nameOf(x); if (seen[x.name]) dup.push(x.name); seen[x.name] = 1; }
+  if (dup.length) msgs.push("Achtung, doppelte Ordnernamen: " + dup.join(", "));
+
+  rows = keep.map(x => ({pos: x.pos, name: x.name, street: x.street, nr: x.nr}));
+  try { localStorage.setItem("qr_rows", JSON.stringify({file: file.name, rows})); } catch (e) {}
+  $("status").textContent = file.name + " · " + rows.length + " Gebäude";
+  $("msg").innerHTML = msgs.length ? '<details class="log" open><summary>Protokoll (' + msgs.length + ')</summary><div class="logbody">' +
+    msgs.map(m => '<p class="note' + (/Achtung/.test(m) ? " err" : "") + '">' + esc(m) + "</p>").join("") + "</div></details>" : "";
+  render();
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+// ---------- Anzeige ----------
+function render(){
+  const f = $("q").value.trim().toLowerCase();
+  shown = rows.filter(r => !f || r.name.toLowerCase().includes(f));
+  if (!rows.length){
+    $("grid").innerHTML = '<div class="empty" style="grid-column:1/-1">Excel-Tabelle laden, um die Gebäude-Buttons zu erzeugen.</div>';
+    return;
+  }
+  $("grid").innerHTML = shown.map((r, i) =>
+    '<button class="house" data-i="' + i + '"><b>' + esc(r.pos) + '</b><span>' + esc([r.street, r.nr].filter(Boolean).join(" ")) + "</span></button>").join("");
+}
+
+function openQr(i){
+  if (!ov.length) return;
+  cur = (i + ov.length) % ov.length;
+  const r = ov[cur];
+  const k = haus && karten;
+  $("qrbox").innerHTML = qrSvg(k ? CONTROL[kc].c : r.code);
+  $("qrname").textContent = k ? CONTROL[kc].t : r.label;
+  $("qhead").textContent = k ? r.head : "";
+  $("qhead").hidden = !k;
+  $("ktabs").hidden = !k;
+  $("kbtn").hidden = !haus;
+  $("kbtn").textContent = k ? "Haus-QR" : "Steuerkarten";
+  Array.from($("ktabs").children).forEach((b, j) => b.setAttribute("aria-pressed", j === kc));
+  $("cnt").textContent = (cur + 1) + " von " + ov.length;
+  $("qrov").classList.add("on");
+}
+
+function tab(n){
+  $("v1").hidden = n !== 1; $("v2").hidden = n !== 2;
+  $("t1").setAttribute("aria-selected", n === 1); $("t2").setAttribute("aria-selected", n === 2);
+}
+
+$("load").onclick = () => $("file").click();
+$("file").onchange = e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ""; };
+$("q").oninput = render;
+$("grid").onclick = e => { const b = e.target.closest(".house"); if (b){ haus = true; karten = false; ov = shown.map(r => ({code: PREFIX + r.name, label: r.name, head: [r.street, r.nr].filter(Boolean).join(" ")})); openQr(+b.dataset.i); } };
+$("close").onclick = () => $("qrov").classList.remove("on");
+$("prev").onclick = () => { karten = false; openQr(cur - 1); };
+$("next").onclick = () => { karten = false; openQr(cur + 1); };
+$("kbtn").onclick = () => { karten = !karten; openQr(cur); };
+$("ktabs").innerHTML = KURZ.map((t, j) => '<button class="btn alt" data-k="' + j + '">' + t + "</button>").join("");
+$("ktabs").onclick = e => { const b = e.target.closest("button"); if (b){ kc = +b.dataset.k; openQr(cur); } };
+$("t1").onclick = () => tab(1);
+$("t2").onclick = () => tab(2);
+$("cards").innerHTML = CONTROL.map((c, i) =>
+  '<button class="card" data-i="' + i + '" aria-label="' + c.t + ' im Vollbild">' + qrSvg(c.c) + "<h3>" + c.t + '</h3><div style="color:#555;font-size:.8rem">' + c.c + "</div></button>").join("");
+$("cards").onclick = e => { const b = e.target.closest(".card"); if (b){ haus = false; karten = false; ov = CONTROL.map(c => ({code: c.c, label: c.t})); openQr(+b.dataset.i); } };
+
+try {
+  const s = JSON.parse(localStorage.getItem("qr_rows") || "null");
+  if (s && s.rows){ rows = s.rows; $("status").textContent = s.file + " · " + rows.length + " Gebäude"; }
+} catch (e) {}
+render();
+</script>
+</body>
+</html>
