@@ -278,7 +278,10 @@ $("close").onclick = () => {
   if (histOffen){ history.back(); setTimeout(() => { if ($("qrov").classList.contains("on")) closeQr(); }, 200); }
   else closeQr();
 };
-window.addEventListener("popstate", () => { if ($("qrov").classList.contains("on")) closeQr(); });
+window.addEventListener("popstate", () => {
+  if ($("qrov").classList.contains("on")) { closeQr(); return; }
+  if (!$("v2").hidden) { tabHist = false; tab(1); }     // Zurück aus dem Reiter Steuerkarten -> Gebäude
+});
 // Antippen des QR-Codes: nächste Steuerkarte (Karten rotieren)
 $("qrbox").onclick = () => {
   if (haus && karten){ kc = (kc + 1) % CONTROL.length; openQr(cur); }
@@ -289,8 +292,17 @@ $("next").onclick = () => { karten = false; openQr(cur + 1); };
 $("kbtn").onclick = () => { karten = !karten; openQr(cur); };
 $("ktabs").innerHTML = KURZ.map((t, j) => '<button class="btn alt" data-k="' + j + '">' + t + "</button>").join("");
 $("ktabs").onclick = e => { const b = e.target.closest("button"); if (b){ kc = +b.dataset.k; openQr(cur); } };
-$("t1").onclick = () => tab(1);
-$("t2").onclick = () => tab(2);
+let tabHist = false;
+$("t1").onclick = () => {
+  if (tabHist){ history.back(); setTimeout(() => { if (!$("v2").hidden){ tabHist = false; tab(1); } }, 200); }
+  else tab(1);
+};
+$("t2").onclick = () => {
+  if ($("v2").hidden){
+    tab(2);
+    try { history.pushState({tab: 2}, ""); tabHist = true; } catch (e) {}
+  }
+};
 $("cards").innerHTML = CONTROL.map((c, i) =>
   '<button class="card" data-i="' + i + '" aria-label="' + c.t + ' im Vollbild">' + qrSvg(c.c) + "<h3>" + c.t + '</h3><div style="color:#555;font-size:.8rem">' + c.c + "</div></button>").join("");
 $("cards").onclick = e => { const b = e.target.closest(".card"); if (b){ haus = false; karten = false; ov = CONTROL.map(c => ({code: c.c, label: c.t})); openQr(+b.dataset.i); } };
