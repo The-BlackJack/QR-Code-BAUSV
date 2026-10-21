@@ -165,7 +165,7 @@ function parseSheet(buf){
     const street = clean(r[1]);
     if (!street) continue;
     let pos = clean(r[0]);
-    if (/^\d+$/.test(pos) && pos.length < 2) pos = pos.padStart(2, "0");
+    if (/^\d+$/.test(pos)) pos = String(parseInt(pos, 10));   // führende Nullen später nach Gesamtzahl setzen
     out.push({line: off + i + 1, pos, street, nr: clean(r[2])});
   }
   return out;
@@ -194,8 +194,11 @@ async function importFile(file){
 
   // Zeilen ohne Nummer: Fehler melden, Benutzer fragt nach neuer Nummer
   const nums = list.map(x => /^\d+$/.test(x.pos) ? parseInt(x.pos, 10) : 0);
+  const fehlt = list.filter(x => !x.pos).length;
   let next = Math.max(0, ...nums) + 1;
-  const width = Math.max(2, String(next).length);
+  // Stellenzahl nach Gesamtzahl der Häuser: bis 9 = 1, bis 99 = 01, bis 999 = 001
+  const width = String(Math.max(1, Math.max(0, ...nums) + fehlt)).length;
+  list.forEach(x => { if (/^\d+$/.test(x.pos)) x.pos = x.pos.padStart(width, "0"); });
   const keep = [];
   for (const x of list){
     if (!x.pos){
