@@ -53,7 +53,7 @@ dialog p{margin:0 0 14px}
 #ktabs{display:flex;gap:6px;margin:0 0 10px}
 #ktabs .btn{flex:1;padding:10px 4px}
 #ktabs .btn[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
-#qhead{font-size:1.2rem;font-weight:700;text-align:center;margin:0 8px 8px;overflow-wrap:anywhere}
+#qhead{font-size:1.2rem;font-weight:700;text-align:center;margin:12px 8px 0;overflow-wrap:anywhere}
 .log{margin:0 0 12px}
 .log summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600;background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:0 12px;list-style:none}
 .log summary::-webkit-details-marker{display:none}
@@ -61,10 +61,11 @@ dialog p{margin:0 0 14px}
 .log:not([open]) summary::before{content:"\25B8"}
 .logbody{margin-top:8px}
 .logbody .note:last-child{margin-bottom:0}
-#qrbox{background:#fff;border-radius:10px;padding:14px;margin:0 auto;width:min(100%,70vh);flex:0 1 auto}
+#qrbox{background:#fff;border-radius:10px;padding:14px;margin:12px auto 0;width:min(100%,70vh);flex:0 1 auto;cursor:pointer}
 #qrbox svg{width:100%;height:auto;display:block}
 #qrname{font-size:1.3rem;font-weight:700;text-align:center;margin:14px 8px 4px;overflow-wrap:anywhere}
-.nav2{display:flex;gap:8px;margin:auto 0 12px}
+.nav2{display:flex;gap:8px;margin:0 0 12px}
+.bottom{margin-top:auto}
 .nav2 .btn{flex:1}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 </style>
@@ -95,12 +96,14 @@ dialog p{margin:0 0 14px}
 </main>
 
 <div id="qrov" role="dialog" aria-modal="true" aria-label="QR-Code">
-  <div class="top"><button class="btn alt" id="close">Schließen</button><button class="btn alt" id="kbtn" hidden>Steuerkarten</button><span class="sub" id="cnt"></span></div>
-  <div id="ktabs" hidden></div>
   <div id="qhead" hidden></div>
   <div id="qrbox"></div>
   <div id="qrname"></div>
-  <div class="nav2"><button class="btn alt" id="prev">Zurück</button><button class="btn alt" id="next">Weiter</button></div>
+  <div class="bottom">
+    <div id="ktabs" hidden></div>
+    <div class="top"><button class="btn alt" id="close">Schließen</button><button class="btn alt" id="kbtn" hidden>Steuerkarten</button><span class="sub" id="cnt"></span></div>
+    <div class="nav2"><button class="btn alt" id="prev">Zurück</button><button class="btn alt" id="next">Weiter</button></div>
+  </div>
 </div>
 
 <dialog id="dlg">
@@ -253,7 +256,11 @@ function openQr(i){
   $("kbtn").textContent = k ? "Haus-QR" : "Steuerkarten";
   Array.from($("ktabs").children).forEach((b, j) => b.setAttribute("aria-pressed", j === kc));
   $("cnt").textContent = (cur + 1) + " von " + ov.length;
+  const war = $("qrov").classList.contains("on");
   $("qrov").classList.add("on");
+  if (!war){   // Android-Zurück-Taste/Wischgeste schließt die Vollbildansicht
+    try { history.pushState({qr: 1}, ""); histOffen = true; } catch (e) {}
+  }
 }
 
 function tab(n){
@@ -265,7 +272,18 @@ $("load").onclick = () => $("file").click();
 $("file").onchange = e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ""; };
 $("q").oninput = render;
 $("grid").onclick = e => { const b = e.target.closest(".house"); if (b){ haus = true; karten = false; ov = shown.map(r => ({code: PREFIX + r.name, label: r.name, head: [r.street, r.nr].filter(Boolean).join(" ")})); openQr(+b.dataset.i); } };
-$("close").onclick = () => $("qrov").classList.remove("on");
+let histOffen = false;
+function closeQr(){ $("qrov").classList.remove("on"); histOffen = false; }
+$("close").onclick = () => {
+  if (histOffen){ history.back(); setTimeout(() => { if ($("qrov").classList.contains("on")) closeQr(); }, 200); }
+  else closeQr();
+};
+window.addEventListener("popstate", () => { if ($("qrov").classList.contains("on")) closeQr(); });
+// Antippen des QR-Codes: nächste Steuerkarte (Karten rotieren)
+$("qrbox").onclick = () => {
+  if (haus && karten){ kc = (kc + 1) % CONTROL.length; openQr(cur); }
+  else if (!haus){ openQr(cur + 1); }
+};
 $("prev").onclick = () => { karten = false; openQr(cur - 1); };
 $("next").onclick = () => { karten = false; openQr(cur + 1); };
 $("kbtn").onclick = () => { karten = !karten; openQr(cur); };
