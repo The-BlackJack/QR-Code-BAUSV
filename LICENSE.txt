@@ -6,8 +6,7 @@ Copyright (c) 2026 Alexandre Bhar. Alle Rechte vorbehalten.
 
 Rechteinhaber:
 Alexandre Bhar
-Reumontstr. 14
-52064 Aachen
+Alexandrebhar@gmail.com
 Deutschland
 
 Stand: Oktober 2026, Version 1.0
@@ -138,4 +137,4 @@ an diesen Anbieter übertragen. Die Inhalte der Excel-Tabelle werden nicht über
 
 
 Anfragen zu Lizenzen:
-Alexandre Bhar, Reumontstr. 14, 52064 Aachen
+Alexandre Bhar, Alexandrebhar@gmail.com
