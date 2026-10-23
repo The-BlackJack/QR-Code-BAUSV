@@ -1,6 +1,7 @@
 {
-  "name": "QR-Ordnercodes",
-  "short_name": "QR-Codes",
+  "name": "SV-ReportQR – Dein digitaler Assistent für die Gutachtenerstellung",
+  "short_name": "SV-ReportQR",
+  "description": "QR-Codes für Gebäude und Steuerkarten zu SV-ReportAssist. © 2026 Alexandre Bhar",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#e6e9ec",

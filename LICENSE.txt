@@ -1,0 +1,141 @@
+SOFTWARE-LIZENZBEDINGUNGEN
+SV-ReportAssist und SV-ReportQR
+Dein digitaler Assistent für die Gutachtenerstellung
+
+Copyright (c) 2026 Alexandre Bhar. Alle Rechte vorbehalten.
+
+Rechteinhaber:
+Alexandre Bhar
+Reumontstr. 14
+52064 Aachen
+Deutschland
+
+Stand: Oktober 2026, Version 1.0
+
+
+§ 1 Gegenstand
+
+(1) Diese Bedingungen gelten für die Software "SV-ReportAssist" (Windows-Programm
+    zum Sortieren von Fotos und Erstellen von Gutachten), die Web-App "SV-ReportQR"
+    (Erzeugung von QR-Codes) sowie für alle zugehörigen Bestandteile, insbesondere
+    Quelltext, ausführbare Dateien, Symbole und Grafiken, Dokumentation und
+    Programmnamen (zusammen "Software"), einschließlich aller Updates und Neuversionen.
+
+(2) Die Software ist als Computerprogramm nach §§ 69a ff. Urheberrechtsgesetz (UrhG)
+    urheberrechtlich geschützt.
+
+
+§ 2 Vorbehalt aller Rechte
+
+(1) Sämtliche Rechte an der Software liegen ausschließlich beim Rechteinhaber. Dies
+    umfasst insbesondere das Recht zur Nutzung, zur dauerhaften oder vorübergehenden
+    Vervielfältigung, zur Übersetzung, Bearbeitung, zum Arrangement und zu anderen
+    Umarbeitungen, zur Verbreitung einschließlich Vermietung und Verleih, zur
+    öffentlichen Wiedergabe und öffentlichen Zugänglichmachung sowie zur Verwertung
+    in jeder bekannten oder unbekannten Nutzungsart.
+
+(2) Die Bezeichnungen "SV-ReportAssist" und "SV-ReportQR" sowie das Programmsymbol
+    sind Kennzeichen des Rechteinhabers und dürfen ohne seine schriftliche Zustimmung
+    nicht verwendet werden.
+
+(3) Die Veröffentlichung des Quelltextes, etwa in einem öffentlich einsehbaren
+    Repository oder als Web-Seite, räumt keinerlei Nutzungsrechte ein. Das Lesen des
+    Quelltextes berechtigt nicht zu seiner Verwendung.
+
+
+§ 3 Nutzungsrecht nur mit Lizenz
+
+(1) Ein Recht zur Nutzung der Software entsteht ausschließlich durch einen gesonderten
+    Lizenz- oder Abonnementvertrag in Textform mit dem Rechteinhaber ("Lizenzvertrag").
+    Ohne Lizenzvertrag ist jede Nutzung untersagt.
+
+(2) Soweit der Lizenzvertrag nichts anderes bestimmt, erhält der Lizenznehmer ein
+    einfaches, nicht ausschließliches, nicht übertragbares und nicht unterlizenzierbares
+    Recht, die Software für die Dauer des Lizenzvertrags für eigene interne Zwecke im
+    vereinbarten Umfang (Anzahl der Nutzer oder Arbeitsplätze) zu verwenden.
+
+(3) Mit dem Ende des Lizenzvertrags erlischt das Nutzungsrecht. Der Lizenznehmer muss
+    die Nutzung dann einstellen und alle Kopien der Software löschen. Mit der Software
+    erzeugte Ergebnisse (sortierte Fotoordner, Gutachten) darf er weiter verwenden.
+
+
+§ 4 Nicht erlaubte Handlungen
+
+Ohne vorherige schriftliche Zustimmung des Rechteinhabers ist es insbesondere untersagt,
+
+  a) die Software über das für die vertragsgemäße Nutzung notwendige Maß hinaus zu
+     vervielfältigen;
+  b) die Software zu bearbeiten, zu übersetzen, zu dekompilieren, zurückzuentwickeln
+     (Reverse Engineering) oder abgeleitete Werke zu erstellen, soweit dies nicht nach
+     § 69d oder § 69e UrhG zwingend erlaubt ist;
+  c) die Software oder Teile davon an Dritte weiterzugeben, zu verkaufen, zu vermieten,
+     zu verleihen, unterzulizenzieren oder Dritten als Dienstleistung bereitzustellen;
+  d) Urheberrechtsvermerke, Kennzeichen oder diese Lizenzbedingungen zu entfernen oder
+     zu verändern;
+  e) technische Schutz- oder Lizenzprüfungsmaßnahmen zu umgehen.
+
+
+§ 5 Gesetzlich zwingende Rechte
+
+Die gesetzlich zwingenden Rechte des berechtigten Nutzers, insbesondere nach § 69d
+Abs. 2 und 3 UrhG (Sicherungskopie, Beobachten und Testen) und § 69e UrhG
+(Dekompilierung zur Herstellung der Interoperabilität), bleiben unberührt.
+
+
+§ 6 Bestandteile Dritter
+
+Die Software enthält Bestandteile Dritter (Open-Source-Bibliotheken), die unter ihren
+eigenen Lizenzen stehen. Diese sind in der Datei THIRD-PARTY-LICENSES.txt aufgeführt.
+Für diese Bestandteile gelten vorrangig deren Lizenzbedingungen; die Rechte, die diese
+Lizenzen gewähren, werden durch die vorliegenden Bedingungen nicht eingeschränkt.
+
+
+§ 7 Gewährleistung und Haftung
+
+(1) Die Software ist ein Hilfsmittel. Die fachliche Verantwortung für den Inhalt eines
+    Gutachtens, die Prüfung der Sortierung und die richtige Zuordnung der Fotos liegt
+    beim Anwender. Die Software verändert die Originalfotos nicht; für die Sicherung
+    seiner Daten ist der Anwender selbst verantwortlich.
+
+(2) Der Rechteinhaber haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei
+    der Verletzung von Leben, Körper oder Gesundheit, nach dem Produkthaftungsgesetz,
+    bei arglistigem Verschweigen eines Mangels sowie im Umfang einer übernommenen
+    Garantie.
+
+(3) Bei leichter Fahrlässigkeit haftet der Rechteinhaber nur bei Verletzung einer
+    Pflicht, deren Erfüllung die ordnungsgemäße Durchführung des Vertrags überhaupt erst
+    ermöglicht und auf deren Einhaltung der Vertragspartner regelmäßig vertrauen darf
+    (Kardinalpflicht). Die Haftung ist dann auf den vertragstypischen, vorhersehbaren
+    Schaden begrenzt. Im Übrigen ist die Haftung für leichte Fahrlässigkeit
+    ausgeschlossen.
+
+(4) Wird die Software unentgeltlich überlassen (zum Beispiel zum Testen), haftet der
+    Rechteinhaber nur für Vorsatz, grobe Fahrlässigkeit und arglistig verschwiegene
+    Mängel sowie für Schäden aus der Verletzung von Leben, Körper oder Gesundheit.
+
+
+§ 8 Datenverarbeitung
+
+Die Software verarbeitet Fotos, Tabellen und Dokumente ausschließlich lokal auf dem
+Gerät des Anwenders. Es werden keine Daten an den Rechteinhaber übermittelt. Die
+Web-App SV-ReportQR lädt beim Start zwei Programmbibliotheken von einem öffentlichen
+Server (cdnjs.cloudflare.com); dabei wird technisch bedingt die IP-Adresse des Geräts
+an diesen Anbieter übertragen. Die Inhalte der Excel-Tabelle werden nicht übertragen.
+
+
+§ 9 Schlussbestimmungen
+
+(1) Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des
+    UN-Kaufrechts (CISG).
+
+(2) Ist der Vertragspartner Kaufmann, juristische Person des öffentlichen Rechts oder
+    öffentlich-rechtliches Sondervermögen, ist Gerichtsstand Aachen.
+
+(3) Bestimmungen eines Lizenzvertrags nach § 3 gehen diesen Bedingungen vor.
+
+(4) Sollte eine Bestimmung unwirksam sein oder werden, bleibt die Wirksamkeit der
+    übrigen Bestimmungen unberührt.
+
+
+Anfragen zu Lizenzen:
+Alexandre Bhar, Reumontstr. 14, 52064 Aachen

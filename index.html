@@ -1,9 +1,28 @@
 <!doctype html>
+<!--
+  SV-ReportQR – Dein digitaler Assistent für die Gutachtenerstellung
+  Smartphone-App (Web-App) zum Anzeigen der QR-Codes für SV-ReportAssist.
+
+  Copyright (c) 2026 Alexandre Bhar, Reumontstr. 14, 52064 Aachen.
+  Alle Rechte vorbehalten. Nutzung nur mit Lizenz des Rechteinhabers, siehe LICENSE.txt.
+
+  Verwendete Bibliotheken (werden beim Start von cdnjs geladen):
+    SheetJS Community Edition 0.18.5 (Apache License 2.0)  – liest die Excel-Tabelle
+    qrcode-generator 1.4.4 von Kazuhiko Arase (MIT License) – erzeugt die QR-Codes
+  QR Code ist eine eingetragene Marke der DENSO WAVE INCORPORATED.
+
+  Inhalt der QR-Codes (muss zu SV-ReportAssist passen):
+    Gebäude:       ORDNER:<Nr>_<Straße>_<Hausnummer>, z. B. ORDNER:01_Neusser Landstraße_301
+    Steuerkarten:  CMD:AUSSEN, CMD:INNEN, CMD:START, CMD:STOP
+-->
 <html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>QR-Ordnercodes</title>
+<title>SV-ReportQR</title>
+<meta name="description" content="SV-ReportQR – Dein digitaler Assistent für die Gutachtenerstellung">
+<meta name="author" content="Alexandre Bhar">
+<meta name="copyright" content="© 2026 Alexandre Bhar. Alle Rechte vorbehalten.">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,49 +30,44 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
+/* ---------- Farben (hell/dunkel) ---------- */
 :root{--bg:#e6e9ec;--surf:#f7f8f9;--ink:#1b1f24;--mute:#5b6570;--line:#c3c9cf;--acc:#f2b705;--acc-ink:#1b1f24;--err:#b3261e;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181b;--surf:#1f2429;--ink:#eceff1;--mute:#9aa5af;--line:#38414a;--err:#ff8a80}}
 :root[data-theme="dark"]{--bg:#15181b;--surf:#1f2429;--ink:#eceff1;--mute:#9aa5af;--line:#38414a;--err:#ff8a80}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Bahnschrift","Segoe UI",system-ui,sans-serif}
-header{padding:14px 16px 0}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+
+/* ---------- Kopf und Reiter ---------- */
+header{padding:14px 16px 0;display:flex;align-items:flex-start;gap:12px}
+header .titel{flex:1;min-width:0}
 h1{margin:0;font-size:1.35rem;font-weight:700;letter-spacing:.01em}
-.sub{color:var(--mute);font-size:.9rem;margin:2px 0 0}
-nav{display:flex;gap:0;margin:12px 16px 0;border-bottom:2px solid var(--line)}
+.tagline{margin:1px 0 0;font-size:.9rem;font-weight:600;color:var(--mute)}
+.sub{color:var(--mute);font-size:.9rem;margin:4px 0 0}
+#about{background:none;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-size:.9rem;padding:8px 12px;min-height:40px}
+nav{display:flex;margin:12px 16px 0;border-bottom:2px solid var(--line)}
 nav button{flex:1;background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:12px 4px;font:inherit;font-weight:600;color:var(--mute)}
 nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
 main{padding:14px 16px 32px;max-width:900px;margin:0 auto}
+footer{color:var(--mute);font-size:.8rem;text-align:center;padding:0 16px 24px}
+
+/* ---------- Bedienelemente ---------- */
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:6px;padding:12px 16px;font:inherit;font-weight:700;min-height:48px}
 .btn.alt{background:var(--surf);color:var(--ink);border:1px solid var(--line)}
 input[type=search]{flex:1;min-width:140px;min-height:48px;border:1px solid var(--line);border-radius:6px;background:var(--surf);color:var(--ink);padding:0 12px;font:inherit}
+
+/* ---------- Gebäude-Buttons, Hinweise, Protokoll ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.house{background:var(--surf);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:6px;text-align:left;padding:10px 10px;font:inherit;min-height:64px}
+.house{background:var(--surf);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:6px;text-align:left;padding:10px;font:inherit;min-height:64px}
 .house b{display:block;font-size:1.15rem}
 .house span{color:var(--mute);font-size:.88rem}
 .empty{border:2px dashed var(--line);border-radius:8px;padding:28px 16px;text-align:center;color:var(--mute)}
 .note{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 12px;font-size:.92rem}
 .note.err{border-color:var(--err)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-.card{background:#fff;color:#111;border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line);font:inherit;width:100%;cursor:pointer}
-.card svg{width:100%;height:auto;display:block}
-.card h3{margin:8px 0 0;font-size:1.05rem}
-dialog{border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);padding:18px;max-width:min(440px,92vw)}
-dialog::backdrop{background:rgba(0,0,0,.55)}
-dialog p{margin:0 0 14px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-#qrov{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;padding:env(safe-area-inset-top,0px) 12px env(safe-area-inset-bottom,0px);z-index:5}
-#qrov.on{display:flex}
-[hidden]{display:none!important}
-#qrov .top{display:flex;align-items:center;padding:10px 0;gap:8px}
-#qrov .top .btn{padding:12px 12px}
-#qrov .top .sub{margin-left:auto;white-space:nowrap;font-size:.85rem}
-#ktabs{display:flex;gap:6px;margin:0 0 10px}
-#ktabs .btn{flex:1;padding:10px 4px}
-#ktabs .btn[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
-#qhead{font-size:1.2rem;font-weight:700;text-align:center;margin:12px 8px 0;overflow-wrap:anywhere}
 .log{margin:0 0 12px}
 .log summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600;background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:0 12px;list-style:none}
 .log summary::-webkit-details-marker{display:none}
@@ -61,19 +75,50 @@ dialog p{margin:0 0 14px}
 .log:not([open]) summary::before{content:"\25B8"}
 .logbody{margin-top:8px}
 .logbody .note:last-child{margin-bottom:0}
+
+/* ---------- Steuerkarten (Reiter 2) ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:#fff;color:#111;border-radius:8px;padding:12px;text-align:center;border:1px solid var(--line);font:inherit;width:100%;cursor:pointer}
+.card svg{width:100%;height:auto;display:block}
+.card h3{margin:8px 0 0;font-size:1.05rem}
+.card small{display:block;color:#555;font-size:.8rem}
+
+/* ---------- Vollbild-QR (Bedienelemente unten für Einhandbedienung) ---------- */
+#qrov{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;padding:env(safe-area-inset-top,0px) 12px env(safe-area-inset-bottom,0px);z-index:5}
+#qrov.on{display:flex}
+#qhead{font-size:1.2rem;font-weight:700;text-align:center;margin:12px 8px 0;overflow-wrap:anywhere}
 #qrbox{background:#fff;border-radius:10px;padding:14px;margin:12px auto 0;width:min(100%,70vh);flex:0 1 auto;cursor:pointer}
 #qrbox svg{width:100%;height:auto;display:block}
 #qrname{font-size:1.3rem;font-weight:700;text-align:center;margin:14px 8px 4px;overflow-wrap:anywhere}
-.nav2{display:flex;gap:8px;margin:0 0 12px}
 .bottom{margin-top:auto}
+#ktabs{display:flex;gap:6px;margin:0 0 10px}
+#ktabs .btn{flex:1;padding:10px 4px}
+#ktabs .btn[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+#qrov .top{display:flex;align-items:center;padding:10px 0;gap:8px}
+#qrov .top .btn{padding:12px}
+#qrov .top .sub{margin-left:auto;white-space:nowrap;font-size:.85rem}
+.nav2{display:flex;gap:8px;margin:0 0 12px}
 .nav2 .btn{flex:1}
-:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+
+/* ---------- Dialoge ---------- */
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);padding:18px;max-width:min(460px,92vw);max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog p{margin:0 0 14px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+#aboutdlg h2{margin:0;font-size:1.2rem}
+#aboutdlg .tagline{margin-bottom:12px}
+#aboutdlg p{font-size:.92rem}
+#aboutdlg ul{margin:0 0 14px;padding-left:20px;font-size:.88rem}
 </style>
 </head>
 <body>
 <header>
-  <h1>QR-Ordnercodes</h1>
-  <p class="sub" id="status">Noch keine Tabelle geladen.</p>
+  <div class="titel">
+    <h1>SV-ReportQR</h1>
+    <p class="tagline">Dein digitaler Assistent für die Gutachtenerstellung</p>
+    <p class="sub" id="status">Noch keine Tabelle geladen.</p>
+  </div>
+  <button id="about" type="button">Über</button>
 </header>
 <nav role="tablist">
   <button role="tab" id="t1" aria-selected="true">Gebäude</button>
@@ -94,7 +139,9 @@ dialog p{margin:0 0 14px}
     <div class="cards" id="cards"></div>
   </section>
 </main>
+<footer>© 2026 Alexandre Bhar · Alle Rechte vorbehalten</footer>
 
+<!-- Vollbildansicht eines QR-Codes -->
 <div id="qrov" role="dialog" aria-modal="true" aria-label="QR-Code">
   <div id="qhead" hidden></div>
   <div id="qrbox"></div>
@@ -106,31 +153,62 @@ dialog p{margin:0 0 14px}
   </div>
 </div>
 
+<!-- Rückfrage bei fehlender Nummer -->
 <dialog id="dlg">
   <p id="dtext"></p>
   <div class="row"><button class="btn" id="dyes"></button><button class="btn alt" id="dno">Zeile überspringen</button></div>
 </dialog>
 
+<!-- Über / Lizenz -->
+<dialog id="aboutdlg">
+  <h2>SV-ReportQR <span id="ver"></span></h2>
+  <p class="tagline">Dein digitaler Assistent für die Gutachtenerstellung</p>
+  <p>Erzeugt aus der Aufnahmetabelle die QR-Codes für Gebäude und Steuerkarten. Das Windows-Programm SV-ReportAssist sortiert damit die Fotos und erstellt das Gutachten.</p>
+  <p><b>Copyright © 2026 Alexandre Bhar</b><br>Reumontstr. 14<br>52064 Aachen<br>Alle Rechte vorbehalten.</p>
+  <p>Diese Software ist urheberrechtlich geschützt. Sämtliche Rechte, insbesondere zur Nutzung, Vervielfältigung, Bearbeitung, Verbreitung und öffentlichen Zugänglichmachung, liegen beim Rechteinhaber. Die Nutzung ist nur mit einer gültigen Lizenz des Rechteinhabers erlaubt. Einzelheiten: <a href="LICENSE.txt" target="_blank" rel="noopener">LICENSE.txt</a>.</p>
+  <p>Datenschutz: Die Excel-Tabelle wird nur auf diesem Gerät verarbeitet und nicht hochgeladen.</p>
+  <p>Verwendete Bibliotheken:</p>
+  <ul>
+    <li>SheetJS Community Edition (Apache License 2.0)</li>
+    <li>qrcode-generator von Kazuhiko Arase (MIT License)</li>
+  </ul>
+  <p>QR Code ist eine eingetragene Marke der DENSO WAVE INCORPORATED.</p>
+  <div class="row"><button class="btn" id="aboutclose">Schließen</button></div>
+</dialog>
+
 <script>
 "use strict";
-// QR-Texte mit Umlauten als UTF-8 kodieren
-qrcode.stringToBytes = s => Array.from(new TextEncoder().encode(s));
-const $ = id => document.getElementById(id);
-let rows = [];          // {pos, name}
-let shown = [];         // aktuell gefilterte Liste
-let cur = 0;
-let ov = [];
-let haus = false, karten = false, kc = 0;   // Vollbild: Gebäude-Modus, Steuerkarten-Ansicht, gewählte Karte
-const KURZ = ["Außen", "Innen", "Start", "Stop"];            // Liste für die Vollbildansicht: {code, label}
-
-const PREFIX = "ORDNER:";
-const CONTROL = [
-  {t: "Außenaufnahmen", c: "CMD:AUSSEN"},
-  {t: "Innenaufnahmen", c: "CMD:INNEN"},
-  {t: "Start Gutachten", c: "CMD:START"},
-  {t: "Stop Gutachten", c: "CMD:STOP"}
+/* ======================================================================
+   SV-ReportQR · Copyright (c) 2026 Alexandre Bhar · Alle Rechte vorbehalten
+   ====================================================================== */
+const VERSION = "1.0.0";
+const PREFIX = "ORDNER:";                    // Gebäude-Code, gleich wie in SV-ReportAssist
+const CONTROL = [                            // Steuerkarten: Beschriftung und Code-Inhalt
+  {t: "Außenaufnahmen",  k: "Außen", c: "CMD:AUSSEN"},
+  {t: "Innenaufnahmen",  k: "Innen", c: "CMD:INNEN"},
+  {t: "Start Gutachten", k: "Start", c: "CMD:START"},
+  {t: "Stop Gutachten",  k: "Stop",  c: "CMD:STOP"}
 ];
+const SPEICHER = "qr_rows";                  // Schlüssel im Browser-Speicher (bleibt für alte Daten gleich)
 
+const $ = id => document.getElementById(id);
+
+// ---------- Zustand ----------
+let rows = [];            // alle Gebäude: {pos, name, street, nr}
+let shown = [];           // nach Suche gefilterte Gebäude
+let ov = [];              // Liste der Vollbildansicht: {code, label, head}
+let cur = 0;              // Position in ov
+let haus = false;         // Vollbild zeigt Gebäude (true) oder nur Steuerkarten (false)
+let karten = false;       // im Gebäude-Vollbild: Steuerkarten statt Haus-QR anzeigen
+let kc = 0;               // gewählte Steuerkarte
+let histOffen = false;    // Vollbild hat einen Verlaufseintrag (für Android-Zurück)
+let tabHist = false;      // Reiter "Steuerkarten" hat einen Verlaufseintrag
+
+// QR-Texte mit Umlauten als UTF-8 kodieren (Standard der Bibliothek wäre Latin-1)
+qrcode.stringToBytes = s => Array.from(new TextEncoder().encode(s));
+
+// ---------- Hilfsfunktionen ----------
+/** Bereinigt Text für Ordnernamen – gleiche Regeln wie sicher() in SV-ReportAssist. */
 function clean(v){
   return String(v == null ? "" : v)
     .replace(/[\\\/:*?"<>|]+/g, "-")
@@ -139,6 +217,12 @@ function clean(v){
     .replace(/[. ]+$/, "");
 }
 
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c])); }
+
+/** Ordnername nach Muster "01_Straße_Hausnummer"; leere Teile entfallen. */
+function nameOf(x){ return [x.pos, x.street, x.nr].filter(Boolean).join("_"); }
+
+/** QR-Code als SVG (Fehlerkorrektur M, 4 Module Ruhezone). */
 function qrSvg(text){
   const qr = qrcode(0, "M");
   qr.addData(text, "Byte");
@@ -153,29 +237,33 @@ function qrSvg(text){
 }
 
 // ---------- Excel einlesen ----------
+/**
+ * Liest das erste Tabellenblatt. Erwartet: Spalte A Nummer, B Straße, C Hausnummer,
+ * eine Kopfzeile mit "Strasse"/"Straße" und als Ende die Zeile "Gesamte Anzahl Bilder".
+ */
 function parseSheet(buf){
   const wb = XLSX.read(buf, {type: "array"});
   const ws = wb.Sheets[wb.SheetNames[0]];
   const data = XLSX.utils.sheet_to_json(ws, {header: 1, raw: false, defval: ""});
   const out = [];
-  // SheetJS lässt führende Leerzeilen weg: tatsächlichen Zeilenversatz und Kopfzeile selbst bestimmen
+  // SheetJS lässt führende Leerzeilen weg: echten Zeilenversatz und Kopfzeile selbst bestimmen
   const off = XLSX.utils.decode_range(ws["!ref"]).s.r;
   let head = data.findIndex(r => /^stra(ss|ß)e$/i.test(clean(r[1])));
-  if (head < 0) head = 2 - off;                      // Ersatz: Kopf in Excel-Zeile 2
-  for (let i = head + 1; i < data.length; i++){      // Daten direkt unter der Kopfzeile
+  if (head < 0) head = Math.max(-1, 1 - off);       // Ersatz: Kopfzeile in Excel-Zeile 2
+  for (let i = head + 1; i < data.length; i++){
     const r = data[i];
-    if (/gesamte/i.test(r.join(" "))) break;        // Summenzeile = Tabellenende
+    if (/gesamte/i.test(r.join(" "))) break;          // Summenzeile = Tabellenende
     const street = clean(r[1]);
-    if (!street) continue;
+    if (!street) continue;                            // Zeilen ohne Straße werden übergangen
     let pos = clean(r[0]);
-    if (/^\d+$/.test(pos)) pos = String(parseInt(pos, 10));   // führende Nullen später nach Gesamtzahl setzen
+    if (/^\d+$/.test(pos)) pos = String(parseInt(pos, 10));   // führende Nullen später einheitlich setzen
+    if (/^extra$/i.test(pos)) pos = "EXTRA";
     out.push({line: off + i + 1, pos, street, nr: clean(r[2])});
   }
   return out;
 }
 
-function nameOf(x){ return [x.pos, x.street, x.nr].filter(Boolean).join("_"); }
-
+/** Ja/Nein-Rückfrage als Dialog (Promise mit true/false). */
 function ask(text, yes){
   return new Promise(res => {
     $("dtext").textContent = text;
@@ -184,7 +272,7 @@ function ask(text, yes){
     const done = v => { d.close(); res(v); };
     $("dyes").onclick = () => done(true);
     $("dno").onclick = () => done(false);
-    d.oncancel = e => { e.preventDefault(); };
+    d.oncancel = e => { e.preventDefault(); };       // Auswahl ist Pflicht
     d.showModal();
   });
 }
@@ -195,13 +283,14 @@ async function importFile(file){
   try { list = parseSheet(await file.arrayBuffer()); }
   catch (e) { $("msg").innerHTML = '<p class="note err">Die Datei konnte nicht gelesen werden. Bitte eine .xlsx-Datei wählen.</p>'; return; }
 
-  // Zeilen ohne Nummer: Fehler melden, Benutzer fragt nach neuer Nummer
+  // Stellenzahl nach Gesamtzahl der Häuser: bis 9 = "1", bis 99 = "01", bis 999 = "001"
   const nums = list.map(x => /^\d+$/.test(x.pos) ? parseInt(x.pos, 10) : 0);
   const fehlt = list.filter(x => !x.pos).length;
   let next = Math.max(0, ...nums) + 1;
-  // Stellenzahl nach Gesamtzahl der Häuser: bis 9 = 1, bis 99 = 01, bis 999 = 001
   const width = String(Math.max(1, Math.max(0, ...nums) + fehlt)).length;
   list.forEach(x => { if (/^\d+$/.test(x.pos)) x.pos = x.pos.padStart(width, "0"); });
+
+  // Zeilen ohne Nummer: als Fehler melden und nachfragen, ob die nächste freie Nummer vergeben wird
   const keep = [];
   for (const x of list){
     if (!x.pos){
@@ -221,16 +310,15 @@ async function importFile(file){
   if (dup.length) msgs.push("Achtung, doppelte Ordnernamen: " + dup.join(", "));
 
   rows = keep.map(x => ({pos: x.pos, name: x.name, street: x.street, nr: x.nr}));
-  try { localStorage.setItem("qr_rows", JSON.stringify({file: file.name, rows})); } catch (e) {}
+  try { localStorage.setItem(SPEICHER, JSON.stringify({file: file.name, rows})); } catch (e) {}
   $("status").textContent = file.name + " · " + rows.length + " Gebäude";
+  // Protokoll einklappbar, damit man nicht weit scrollen muss
   $("msg").innerHTML = msgs.length ? '<details class="log" open><summary>Protokoll (' + msgs.length + ')</summary><div class="logbody">' +
     msgs.map(m => '<p class="note' + (/Achtung/.test(m) ? " err" : "") + '">' + esc(m) + "</p>").join("") + "</div></details>" : "";
   render();
 }
 
-function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-
-// ---------- Anzeige ----------
+// ---------- Gebäudeliste ----------
 function render(){
   const f = $("q").value.trim().toLowerCase();
   shown = rows.filter(r => !f || r.name.toLowerCase().includes(f));
@@ -239,9 +327,11 @@ function render(){
     return;
   }
   $("grid").innerHTML = shown.map((r, i) =>
-    '<button class="house" data-i="' + i + '"><b>' + esc(r.pos) + '</b><span>' + esc([r.street, r.nr].filter(Boolean).join(" ")) + "</span></button>").join("");
+    '<button class="house" data-i="' + i + '"><b>' + esc(r.pos) + "</b><span>" + esc([r.street, r.nr].filter(Boolean).join(" ")) + "</span></button>").join("");
 }
 
+// ---------- Vollbildansicht ----------
+/** Zeigt Eintrag i der Liste ov. Im Gebäude-Modus mit Steuerkarten: gewählte Karte mit Adresse darüber. */
 function openQr(i){
   if (!ov.length) return;
   cur = (i + ov.length) % ov.length;
@@ -256,43 +346,56 @@ function openQr(i){
   $("kbtn").textContent = k ? "Haus-QR" : "Steuerkarten";
   Array.from($("ktabs").children).forEach((b, j) => b.setAttribute("aria-pressed", j === kc));
   $("cnt").textContent = (cur + 1) + " von " + ov.length;
-  const war = $("qrov").classList.contains("on");
+  const warOffen = $("qrov").classList.contains("on");
   $("qrov").classList.add("on");
-  if (!war){   // Android-Zurück-Taste/Wischgeste schließt die Vollbildansicht
+  if (!warOffen){            // Verlaufseintrag: Android-Zurück schließt das Vollbild
     try { history.pushState({qr: 1}, ""); histOffen = true; } catch (e) {}
   }
 }
+
+function closeQr(){ $("qrov").classList.remove("on"); histOffen = false; }
 
 function tab(n){
   $("v1").hidden = n !== 1; $("v2").hidden = n !== 2;
   $("t1").setAttribute("aria-selected", n === 1); $("t2").setAttribute("aria-selected", n === 2);
 }
 
+// ---------- Ereignisse ----------
 $("load").onclick = () => $("file").click();
 $("file").onchange = e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ""; };
 $("q").oninput = render;
-$("grid").onclick = e => { const b = e.target.closest(".house"); if (b){ haus = true; karten = false; ov = shown.map(r => ({code: PREFIX + r.name, label: r.name, head: [r.street, r.nr].filter(Boolean).join(" ")})); openQr(+b.dataset.i); } };
-let histOffen = false;
-function closeQr(){ $("qrov").classList.remove("on"); histOffen = false; }
+
+$("grid").onclick = e => {
+  const b = e.target.closest(".house");
+  if (!b) return;
+  haus = true; karten = false;
+  ov = shown.map(r => ({code: PREFIX + r.name, label: r.name, head: [r.street, r.nr].filter(Boolean).join(" ")}));
+  openQr(+b.dataset.i);
+};
+
 $("close").onclick = () => {
   if (histOffen){ history.back(); setTimeout(() => { if ($("qrov").classList.contains("on")) closeQr(); }, 200); }
   else closeQr();
 };
+
+// Android-Zurück (Taste oder Wischgeste): erst Vollbild schließen, dann Reiter "Steuerkarten" -> "Gebäude"
 window.addEventListener("popstate", () => {
-  if ($("qrov").classList.contains("on")) { closeQr(); return; }
-  if (!$("v2").hidden) { tabHist = false; tab(1); }     // Zurück aus dem Reiter Steuerkarten -> Gebäude
+  if ($("qrov").classList.contains("on")){ closeQr(); return; }
+  if (!$("v2").hidden){ tabHist = false; tab(1); }
 });
-// Antippen des QR-Codes: nächste Steuerkarte (Karten rotieren)
+
+// Antippen des QR-Codes: Steuerkarten rotieren (Außen, Innen, Start, Stop); Haus-QR reagiert nicht
 $("qrbox").onclick = () => {
   if (haus && karten){ kc = (kc + 1) % CONTROL.length; openQr(cur); }
   else if (!haus){ openQr(cur + 1); }
 };
+// Weiter/Zurück wechseln das Gebäude und zeigen immer zuerst den Haus-QR
 $("prev").onclick = () => { karten = false; openQr(cur - 1); };
 $("next").onclick = () => { karten = false; openQr(cur + 1); };
 $("kbtn").onclick = () => { karten = !karten; openQr(cur); };
-$("ktabs").innerHTML = KURZ.map((t, j) => '<button class="btn alt" data-k="' + j + '">' + t + "</button>").join("");
+$("ktabs").innerHTML = CONTROL.map((c, j) => '<button class="btn alt" data-k="' + j + '">' + c.k + "</button>").join("");
 $("ktabs").onclick = e => { const b = e.target.closest("button"); if (b){ kc = +b.dataset.k; openQr(cur); } };
-let tabHist = false;
+
 $("t1").onclick = () => {
   if (tabHist){ history.back(); setTimeout(() => { if (!$("v2").hidden){ tabHist = false; tab(1); } }, 200); }
   else tab(1);
@@ -303,12 +406,24 @@ $("t2").onclick = () => {
     try { history.pushState({tab: 2}, ""); tabHist = true; } catch (e) {}
   }
 };
-$("cards").innerHTML = CONTROL.map((c, i) =>
-  '<button class="card" data-i="' + i + '" aria-label="' + c.t + ' im Vollbild">' + qrSvg(c.c) + "<h3>" + c.t + '</h3><div style="color:#555;font-size:.8rem">' + c.c + "</div></button>").join("");
-$("cards").onclick = e => { const b = e.target.closest(".card"); if (b){ haus = false; karten = false; ov = CONTROL.map(c => ({code: c.c, label: c.t})); openQr(+b.dataset.i); } };
 
+$("cards").innerHTML = CONTROL.map((c, i) =>
+  '<button class="card" data-i="' + i + '" aria-label="' + c.t + ' im Vollbild">' + qrSvg(c.c) + "<h3>" + c.t + "</h3><small>" + c.c + "</small></button>").join("");
+$("cards").onclick = e => {
+  const b = e.target.closest(".card");
+  if (!b) return;
+  haus = false; karten = false;
+  ov = CONTROL.map(c => ({code: c.c, label: c.t}));
+  openQr(+b.dataset.i);
+};
+
+$("ver").textContent = VERSION;
+$("about").onclick = () => $("aboutdlg").showModal();
+$("aboutclose").onclick = () => $("aboutdlg").close();
+
+// ---------- Start: zuletzt geladene Tabelle wiederherstellen ----------
 try {
-  const s = JSON.parse(localStorage.getItem("qr_rows") || "null");
+  const s = JSON.parse(localStorage.getItem(SPEICHER) || "null");
   if (s && s.rows){ rows = s.rows; $("status").textContent = s.file + " · " + rows.length + " Gebäude"; }
 } catch (e) {}
 render();
